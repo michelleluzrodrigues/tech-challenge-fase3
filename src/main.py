@@ -12,14 +12,15 @@ def chunk_list(lst, chunk_size):
         yield lst[i:i + chunk_size]
 
 # Função para buscar várias músicas e salvar no arquivo Parquet
-def collect_music_data(genres, limit=10, chunk_size=5, parquet_file='spotify_data.parquet'):
+def collect_music_data(genres, limit=10, chunk_size=5, parquet_file='spotify_data.parquet', offset=0):
     db_manager = SpotifyDatabaseManager(parquet_file)
 
     for genre_chunk in chunk_list(genres, chunk_size):
         query = 'genre:' + ','.join(genre_chunk)
-        print(f"Buscando músicas com os gêneros: {', '.join(genre_chunk)}")
+        print(f"Buscando músicas com os gêneros: {', '.join(genre_chunk)} (Offset: {offset})")
 
-        search_results = search_spotify(query, search_type='track', limit=limit)
+        # Passar o offset para buscar músicas diferentes
+        search_results = search_spotify(query, search_type='track', limit=limit, offset=offset)
 
         if search_results:
             for track in search_results['tracks']['items']:
@@ -49,10 +50,16 @@ def run_in_real_time_all_genres(interval=60, limit=10, chunk_size=5, parquet_fil
         print("Nenhum gênero encontrado.")
         return
 
+    offset = 0  # Inicializa o offset
+
     while True:
         print(f"Iniciando coleta de músicas de todos os gêneros...")
-        collect_music_data(genres, limit=limit, chunk_size=chunk_size, parquet_file=parquet_file)
+        collect_music_data(genres, limit=limit, chunk_size=chunk_size, parquet_file=parquet_file, offset=offset)
         print(f"Aguardando {interval} segundos para a próxima coleta...")
+        
+        # Aumenta o offset para a próxima requisição
+        offset += limit
+        
         time.sleep(interval)  # Esperar antes de realizar nova coleta
 
 # Exemplo de execução do script
