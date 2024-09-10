@@ -1,5 +1,6 @@
 import random
 import time
+import requests  # Adicione esta linha para importar o módulo requests
 from services.spotify_service import search_spotify, get_track_audio_features, get_artist_info, get_available_genres
 from utils.helpers import SpotifyDatabaseManager
 
@@ -11,11 +12,6 @@ invalid_genres = []
 
 # Função para monitorar o limite de requisições (rate limit) da API
 def monitor_rate_limit(response):
-    """
-    Monitora o rate limit e, se necessário, aguarda até o reset antes de prosseguir.
-
-    :param response: Resposta da API que contém os cabeçalhos do rate limit
-    """
     remaining = int(response.headers.get("X-RateLimit-Remaining", 1))  # Pega o número de requisições restantes
     reset_time = int(response.headers.get("X-RateLimit-Reset", 60))  # Tempo até o reset, em segundos
     if remaining < 5:  # Se estiver próximo do limite
@@ -25,15 +21,6 @@ def monitor_rate_limit(response):
 
 # Função para buscar músicas de um gênero específico e salvar no arquivo Parquet
 def collect_music_data(genre, limit=10, offset=0, parquet_file='spotify_data.parquet'):
-    """
-    Coleta músicas de um gênero específico e salva no arquivo Parquet.
-
-    :param genre: Gênero de música a ser buscado
-    :param limit: Número de músicas a serem buscadas
-    :param offset: Offset para paginação de resultados
-    :param parquet_file: Nome do arquivo Parquet para salvar os dados
-    :return: Booleano indicando se a busca foi bem-sucedida
-    """
     if genre in invalid_genres:
         print(f"Ignorando gênero inválido: {genre}")
         return False
@@ -71,34 +58,19 @@ def collect_music_data(genre, limit=10, offset=0, parquet_file='spotify_data.par
 
         return True
 
-    except requests.exceptions.RequestException as e:
-        if e.response.status_code == 429:
-            # Se o erro for 429, espera o tempo indicado no cabeçalho "Retry-After"
-            retry_after = int(e.response.headers.get("Retry-After", 60))
-            print(f"Rate limit atingido, aguardando {retry_after} segundos antes de tentar novamente...")
-            time.sleep(retry_after)
-            return collect_music_data(genre, limit, offset, parquet_file)  # Tenta novamente após o tempo de espera
-        else:
-            print(f"Erro ao buscar músicas para o gênero '{genre}': {str(e)}")
-            invalid_genres.append(genre)  # Marcar o gênero como inválido para não tentar novamente
-            return False
+    except requests.exceptions.RequestException as e:  # Exceção capturada corretamente
+        print(f"Erro ao buscar músicas para o gênero '{genre}': {str(e)}")
+        invalid_genres.append(genre)  # Marcar o gênero como inválido para não tentar novamente
+        return False
 
 # Função principal para rodar o script continuamente com gêneros embaralhados
 def run_in_real_time_all_genres(interval=180, limit=5, parquet_file='spotify_data.parquet'):
-    """
-    Executa a coleta de dados em ciclos contínuos para diferentes gêneros musicais.
-    
-    :param interval: Intervalo entre as coletas, em segundos
-    :param limit: Número de músicas a buscar por gênero
-    :param parquet_file: Nome do arquivo Parquet para salvar os dados
-    """
     genres = get_available_genres()
 
     if not genres:
         print("Nenhum gênero encontrado.")
         return
 
-    max_offset = 1000  # Definir um valor máximo de offset
     offset = 0  # Inicializa o offset
 
     while True:
@@ -110,8 +82,6 @@ def run_in_real_time_all_genres(interval=180, limit=5, parquet_file='spotify_dat
             success = collect_music_data(genre, limit=limit, offset=offset, parquet_file=parquet_file)
             if success:
                 offset += limit  # Aumenta o offset se músicas forem encontradas
-                if offset >= max_offset:  # Se atingir o valor máximo, reinicia o offset
-                    offset = 0
             else:
                 print(f"Falha ao buscar músicas para o gênero: {genre}, tentando o próximo...")
 
