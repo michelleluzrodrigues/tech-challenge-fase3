@@ -2,3 +2,5 @@ requests
 schedule
 boto3
 python-dotenv
+pandas
+pyarrow

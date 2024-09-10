@@ -56,13 +56,6 @@ def get_artist_info(artist_id):
 
 # Função para buscar músicas ou artistas com base em uma palavra-chave
 def search_spotify(query, search_type='track', limit=10):
-    """
-    Função para buscar músicas ou artistas no Spotify.
-    :param query: Palavra-chave para busca
-    :param search_type: Tipo de busca ('track', 'artist', etc.)
-    :param limit: Número de resultados retornados (máx 50)
-    :return: Resultados da busca no formato JSON
-    """
     token = get_access_token()
     url = f"https://api.spotify.com/v1/search?q={query}&type={search_type}&limit={limit}"
 
@@ -77,11 +70,8 @@ def search_spotify(query, search_type='track', limit=10):
     else:
         log_error(response, f'buscar {search_type} com a query "{query}"')
 
+# Função para buscar todos os gêneros disponíveis
 def get_available_genres():
-    """
-    Busca todos os gêneros disponíveis na API do Spotify.
-    :return: Lista de gêneros disponíveis
-    """
     token = get_access_token()
     url = "https://api.spotify.com/v1/recommendations/available-genre-seeds"
     
