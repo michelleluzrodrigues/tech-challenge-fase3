@@ -57,4 +57,4 @@ def run_in_real_time_all_genres(interval=60, limit=10, chunk_size=5, parquet_fil
 
 # Exemplo de execução do script
 if __name__ == "__main__":
-    run_in_real_time_all_genres(interval=10, limit=10, chunk_size=5, parquet_file='spotify_data.parquet')  # Buscar músicas de todos os gêneros em blocos de 5
+    run_in_real_time_all_genres(interval=10, limit=50, chunk_size=5, parquet_file='spotify_data.parquet')  # Buscar músicas de todos os gêneros em blocos de 5
