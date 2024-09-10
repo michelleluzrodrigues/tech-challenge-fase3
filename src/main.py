@@ -1,4 +1,5 @@
 import time
+import random
 from services.spotify_service import search_spotify, get_track_audio_features, get_artist_info, get_available_genres
 from utils.helpers import SpotifyDatabaseManager  # Importa a classe do helpers
 
@@ -42,7 +43,7 @@ def collect_music_data(genres, limit=10, chunk_size=5, parquet_file='spotify_dat
 
                 print(f"Dados da música '{track_name}' e do artista '{artist['name']}' salvos com sucesso.")
 
-# Função principal para rodar o script continuamente
+# Função principal para rodar o script continuamente com gêneros embaralhados
 def run_in_real_time_all_genres(interval=60, limit=10, chunk_size=5, parquet_file='spotify_data.parquet'):
     genres = get_available_genres()
 
@@ -53,7 +54,10 @@ def run_in_real_time_all_genres(interval=60, limit=10, chunk_size=5, parquet_fil
     offset = 0  # Inicializa o offset
 
     while True:
-        print(f"Iniciando coleta de músicas de todos os gêneros...")
+        # Embaralhar a lista de gêneros antes de cada coleta de dados
+        random.shuffle(genres)
+        print(f"Iniciando coleta de músicas de gêneros embaralhados...")
+
         collect_music_data(genres, limit=limit, chunk_size=chunk_size, parquet_file=parquet_file, offset=offset)
         print(f"Aguardando {interval} segundos para a próxima coleta...")
         
