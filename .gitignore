@@ -1,0 +1,16 @@
+# Ignorar arquivos temporários do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignorar arquivos de banco de dados
+*.db
+
+# Ignorar arquivos de ambiente virtual
+venv/
+.env
+
+# Ignorar logs, caches e arquivos temporários
+*.log
+*.sqlite3
+*.cache
