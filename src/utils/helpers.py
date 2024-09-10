@@ -37,4 +37,3 @@ class SpotifyDatabaseManager:
             df_combined = pd.concat([df_existing, df], ignore_index=True)
             df_combined.to_parquet(self.parquet_file, engine='pyarrow', index=False)
 
-        print(f"Dados da música '{track_data['name']}' e do artista '{artist_data['name']}' salvos em {self.parquet_file}.")
